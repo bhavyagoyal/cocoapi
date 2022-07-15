@@ -6,7 +6,8 @@ import time
 from collections import defaultdict
 from . import mask as maskUtils
 import copy
-
+import pickle
+import os
 class COCOeval:
     # Interface for evaluating detection on the Microsoft COCO dataset.
     #
@@ -80,7 +81,6 @@ class COCOeval:
             self.params.imgIds = sorted(cocoGt.getImgIds())
             self.params.catIds = sorted(cocoGt.getCatIds())
 
-
     def _prepare(self):
         '''
         Prepare ._gts and ._dts for evaluation based on params
@@ -124,6 +124,7 @@ class COCOeval:
         :return: None
         '''
         tic = time.time()
+        print('--------------- Updated Code for per image evaluation------------------ ')
         print('Running per image evaluation...')
         p = self.params
         # add backward compatibility if useSegm is specified in params
@@ -370,10 +371,36 @@ class COCOeval:
                     dtIg = np.concatenate([e['dtIgnore'][:,0:maxDet]  for e in E], axis=1)[:,inds]
                     gtIg = np.concatenate([e['gtIgnore'] for e in E])
                     npig = np.count_nonzero(gtIg==0 )
+
                     if npig == 0:
                         continue
                     tps = np.logical_and(               dtm,  np.logical_not(dtIg) )
                     fps = np.logical_and(np.logical_not(dtm), np.logical_not(dtIg) )
+                    #if(a==0 and m==2):
+                    #    dtIDS  = np.concatenate([e['dtIds'][0:maxDet] for e in E])[inds]
+                    #    print(len(dtIDS))
+                    #    print(sum(tps[0]))
+                    #    print(sum(fps[0]))
+                    #    tps_ids=[]
+                    #    fps_ids=[]
+                    #    for j in range(len(tps[0])):
+                    #        if(tps[0][j]==True):
+                    #            tps_ids.append(dtIDS[j])
+                    #        if(fps[0][j]==True):
+                    #            fps_ids.append(dtIDS[j])
+                    #    i=1
+                    #    while(True):
+                    #        if(os.path.exists('redspicklesaves/' + str(k) + "E"+str(i)+'.pkl')):
+                    #            i+=1
+                    #            continue
+                    #        with open('redspicklesaves/' + str(k) + "E" + str(i) + ".pkl", "wb") as f:
+                    #            pickle.dump(E, f)
+                    #        with open('redspicklesaves/' + str(k) + "tps_ids" + str(i) + ".pkl", "wb") as f:
+                    #            pickle.dump(tps_ids, f)
+                    #        with open('redspicklesaves/' + str(k) + "fps_ids" + str(i) + ".pkl", "wb") as f:
+                    #            pickle.dump(fps_ids, f)
+                    #        break
+                    #    print('i: ', i)
 
                     tp_sum = np.cumsum(tps, axis=1).astype(dtype=np.float)
                     fp_sum = np.cumsum(fps, axis=1).astype(dtype=np.float)
